@@ -27,9 +27,11 @@ type Payload struct {
 type ResponseErrorCode string
 
 const (
-	UserNotFound ResponseErrorCode = "user_not_found"
-	UserExist                      = "user_exist"
-	Success                        = "success"
+	UserNotFound   ResponseErrorCode = "user_not_found"
+	UserExist                        = "user_exist"
+	Success                          = "success"
+	SendNotifError                   = "send_notif_error"
+	AddTokenError                    = "add_token_error"
 )
 
 type Response struct {
@@ -63,7 +65,18 @@ func Notification(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		services.SendNotification(user)
+		srverr := services.SendNotification(user, payload.Message, "")
+
+		if srverr != nil {
+			res := Response{
+				SendNotifError,
+				"notifikasi error",
+			}
+
+			res.ReturnData(w)
+			return
+		}
+
 		res := Response{
 			Success,
 			"notifikasi berhasil dikirim",
@@ -73,7 +86,16 @@ func Notification(w http.ResponseWriter, r *http.Request) {
 		return
 
 	} else if payload.Action == AddTokenAction {
-		repo.AddToken(payload.Email, payload.Tokens)
+		_, errepo := repo.AddToken(payload.Email, payload.Tokens)
+
+		if errepo {
+			res := Response{
+				AddTokenError,
+				"token error",
+			}
+			res.ReturnData(w)
+			return
+		}
 
 		res := Response{
 			Success,

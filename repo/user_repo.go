@@ -3,6 +3,7 @@ package repo
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"log"
 
 	"github.com/vaziria/pdcnotification/database"
@@ -28,10 +29,9 @@ func FindByEmail(email string) (models.User, bool) {
 	err := Database.Collection(userCollection).FindOne(database.Ctx, bson.M{email: email}).Decode(&user)
 
 	if err == mongo.ErrNoDocuments {
-		return user, true
+		log.Fatal(err)
 	} else if err != nil {
 		log.Fatal(err)
-		return user, true
 	}
 
 	return user, false
@@ -60,8 +60,10 @@ func AddToken(email string, token []string) (models.User, bool) {
 	user, err := FindByEmail(email)
 
 	if err {
+		fmt.Println("creating user")
 		user, _ = CreateUser(email, token)
-		return user, true
+
+		return user, false
 	}
 
 	filter := bson.M{

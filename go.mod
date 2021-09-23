@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/kms v0.2.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible // indirect
 	github.com/GoogleCloudPlatform/functions-framework-go v1.2.1
+	github.com/NaySoftware/go-fcm v0.0.0-20190516140123-808e978ddcd2
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
