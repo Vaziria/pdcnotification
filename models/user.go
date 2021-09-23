@@ -1,6 +1,7 @@
 package models
 
 type User struct {
-	Email string   `bson:"name"`
-	Token []string `bson:"token"`
+	ID     string   `bson:"_id"`
+	Email  string   `bson:"email"`
+	Tokens []string `bson:"tokens"`
 }

@@ -3,22 +3,86 @@ package pdcnotification
 import (
 	"encoding/json"
 	"fmt"
-	"html"
+	"io"
 	"net/http"
+
+	"github.com/vaziria/pdcnotification/repo"
+	"github.com/vaziria/pdcnotification/services"
 )
 
-func Notification(w http.ResponseWriter, r *http.Request) {
+type ActionNotif string
 
-	var d struct {
-		Message string `json:"message"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		fmt.Fprint(w, "Hello World!")
+const (
+	SendAction     ActionNotif = "send_action"
+	AddTokenAction             = "add_token"
+)
+
+type Payload struct {
+	Action  ActionNotif `json:"action"`
+	Email   string      `json:"email"`
+	Message string      `json:"message"`
+	Tokens  []string    `json:"tokens"`
+}
+
+type ResponseErrorCode string
+
+const (
+	UserNotFound ResponseErrorCode = "user_not_found"
+	UserExist                      = "user_exist"
+	Success                        = "success"
+)
+
+type Response struct {
+	Errcode ResponseErrorCode `json:"errcode"`
+	Message string            `json:"message"`
+}
+
+func (res Response) ReturnData(w io.Writer) {
+	response, _ := json.Marshal(&res)
+	fmt.Fprint(w, string(response))
+}
+
+func Notification(w http.ResponseWriter, r *http.Request) {
+	payload := Payload{}
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		fmt.Fprint(w, err.Error())
 		return
 	}
-	if d.Message == "" {
-		fmt.Fprint(w, "Hello World!")
+
+	if payload.Action == SendAction {
+		user, err := repo.FindByEmail(payload.Email)
+
+		if err {
+			res := Response{
+				UserNotFound,
+				"user tidak ditemukan",
+			}
+
+			res.ReturnData(w)
+			return
+		}
+
+		services.SendNotification(user)
+		res := Response{
+			Success,
+			"notifikasi berhasil dikirim",
+		}
+
+		res.ReturnData(w)
 		return
+
+	} else if payload.Action == AddTokenAction {
+		repo.AddToken(payload.Email, payload.Tokens)
+
+		res := Response{
+			Success,
+			"token added",
+		}
+		res.ReturnData(w)
+		return
+	} else {
+		fmt.Fprint(w, "no action not implemented")
 	}
-	fmt.Fprint(w, html.EscapeString(d.Message))
+
 }
