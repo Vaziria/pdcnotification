@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"encoding/base64"
 	"log"
 	"os"
 
@@ -20,6 +21,9 @@ func Connect() (*mongo.Database, error) {
 		dbUri = "mongodb://localhost:27017"
 		log.Println("env DATABASE_URI nggak ada isinya, using local database")
 		log.Println(dbUri)
+	} else {
+		dbstring, _ := base64.StdEncoding.DecodeString(dbUri)
+		dbUri = string(dbstring)
 	}
 
 	if dbName == "" {
