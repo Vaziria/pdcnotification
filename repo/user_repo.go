@@ -4,12 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"log"
 
 	"github.com/vaziria/pdcnotification/database"
 	"github.com/vaziria/pdcnotification/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepo struct{}
@@ -22,19 +20,23 @@ func GenerateId(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func FindByEmail(email string) (models.User, bool) {
+func FindByEmail(email string) (models.User, error) {
 
 	user := models.User{}
 
-	err := Database.Collection(userCollection).FindOne(database.Ctx, bson.M{email: email}).Decode(&user)
+	result := Database.Collection(userCollection).FindOne(database.Ctx, bson.M{"email": "user@gmail.com"})
 
-	if err == mongo.ErrNoDocuments {
-		log.Fatal(err)
-	} else if err != nil {
-		log.Fatal(err)
+	err := result.Decode(&user)
+
+	// if err == mongo.ErrNoDocuments {
+	// 	return user, err
+	// } else
+
+	if err != nil {
+		return user, err
 	}
 
-	return user, false
+	return user, nil
 }
 
 func CreateUser(email string, tokens []string) (models.User, bool) {
@@ -55,31 +57,32 @@ func CreateUser(email string, tokens []string) (models.User, bool) {
 	return user, false
 }
 
-func AddToken(email string, token []string) (models.User, bool) {
+func AddToken(email string, token []string) (models.User, error) {
 
 	user, err := FindByEmail(email)
 
-	if err {
+	if err != nil {
 		fmt.Println("creating user")
 		user, _ = CreateUser(email, token)
 
-		return user, false
+		return user, nil
 	}
 
 	filter := bson.M{
 		"_id": user.ID,
 	}
 
-	updatedata := bson.D{{Key: "$set", Value: models.User{
-		Tokens: token,
+	updatedata := bson.D{{Key: "$set", Value: bson.M{
+		"tokens": token,
 	}}}
 
 	_, uperr := Database.Collection(userCollection).UpdateOne(database.Ctx, filter, updatedata)
 
 	if uperr != nil {
-		log.Fatal("Error on updating token", err)
+		fmt.Println(uperr.Error())
+		return user, uperr
 	}
 
-	return user, false
+	return user, nil
 
 }

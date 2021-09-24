@@ -55,7 +55,7 @@ func Notification(w http.ResponseWriter, r *http.Request) {
 	if payload.Action == SendAction {
 		user, err := repo.FindByEmail(payload.Email)
 
-		if err {
+		if err != nil {
 			res := Response{
 				UserNotFound,
 				"user tidak ditemukan",
@@ -88,7 +88,7 @@ func Notification(w http.ResponseWriter, r *http.Request) {
 	} else if payload.Action == AddTokenAction {
 		_, errepo := repo.AddToken(payload.Email, payload.Tokens)
 
-		if errepo {
+		if errepo != nil {
 			res := Response{
 				AddTokenError,
 				"token error",

@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/funcframework"
 	"github.com/vaziria/pdcnotification"
+	"github.com/vaziria/pdcnotification/repo"
 )
 
 func main() {
@@ -22,4 +24,14 @@ func main() {
 	if err := funcframework.Start(port); err != nil {
 		log.Fatalf("funcframework.Start: %v\n", err)
 	}
+}
+
+func test_find() {
+	user, err := repo.FindByEmail("user@gmail.com")
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	fmt.Println(user.Email)
 }
