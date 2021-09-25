@@ -16,6 +16,17 @@ untuk running lokal
 }
 ```
 
+# snippet install pligin
+```
+<script>
+  var exports = {"__esModule": true}
+</script>
+<script type="module" src="/script.js"></script>
+<script>
+window.pdcnotification.initializeNotification('user@gmail.com')
+</script>
+```
+
 
 # deploy tutorial
 
