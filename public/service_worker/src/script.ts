@@ -13,7 +13,7 @@ export default class Main {
     }
 
 
-    this.initializeMessaging()
+    // this.initializeMessaging()
   }
 
   initializeMessaging(): void {
@@ -28,10 +28,17 @@ export default class Main {
     }
   }
 
-  testprint(): void {
-    const doc = document.getElementById('title')
-    doc.innerText = `PROJECT ID : ${envType}`
+  initializeNotification(email: string): Promise<void> {
+    if(email) {
+      return setupNotification(email, (data) => {
+        console.log("messaging received data", data)
+
+      }).then(()=>{
+        console.log(`email ${email} setup notification finish`)
+      })
+    }
   }
+
 }
 
-new Main()
+(window as any)['pdcnotification'] = new Main()

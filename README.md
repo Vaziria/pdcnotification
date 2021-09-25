@@ -1,5 +1,22 @@
 # pdcnotification
 
+# endpoint
+
+untuk endpoint production tanya ke developer.
+untuk running lokal
+`go run cmd/main.go`
+
+# payload endpoint
+```
+{
+	action: 'send_action' | 'add_token'
+	email: string
+	message: string
+	token: string[]
+}
+```
+
+
 # deploy tutorial
 
 - gcloud functions deploy Notification --runtime go116 --trigger-http --allow-unauthenticated
